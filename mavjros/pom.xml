@@ -2,6 +2,93 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.comino</groupId>
   <artifactId>mavjros</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <name>mavjros</name>
+  
+  
+  <properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.target>1.10</maven.compiler.target>
+		<maven.compiler.source>1.10</maven.compiler.source>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>rosjava_mvn</id>
+			<name>Public Rosjava repository</name>
+			<url>https://github.com/rosjava/rosjava_mvn_repo/raw/master</url>
+		</repository>
+		<repository>
+			<id>jcenter</id>
+			<url>https://jcenter.bintray.com/</url>
+		</repository>
+	</repositories>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.ros.rosjava_core</groupId>
+			<artifactId>rosjava</artifactId>
+			<version>0.3.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ros.rosjava_messages</groupId>
+			<artifactId>std_msgs</artifactId>
+			<version>0.5.11</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ros.rosjava_messages</groupId>
+			<artifactId>geometry_msgs</artifactId>
+			<version>1.12.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ros.rosjava_messages</groupId>
+			<artifactId>sensor_msgs</artifactId>
+			<version>1.12.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ros.rosjava_messages</groupId>
+			<artifactId>rosjava_test_msgs</artifactId>
+			<version>0.3.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ros.rosjava_bootstrap</groupId>
+			<artifactId>message_generation</artifactId>
+			<version>0.3.3</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.12.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.1</version>
+		</dependency>
+		
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-configuration2</artifactId>
+			<version>2.3</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.boofcv</groupId>
+			<artifactId>boofcv-core</artifactId>
+			<version>0.41</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.comino</groupId>
+			<artifactId>mavodometry</artifactId>
+			<version>0.0.1</version>
+		</dependency>
+		
+	</dependencies>
+  
 </project>
