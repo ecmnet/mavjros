@@ -1,10 +1,9 @@
 package com.comino.mavjros.subscribers.rgb;
 
-import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 
 import org.ddogleg.struct.DogArray_I16;
-import org.ddogleg.struct.DogArray_I8;
+import org.ros.message.Time;
 
 import com.comino.mavcom.model.DataModel;
 import com.comino.mavjros.MavJROSAbstractSubscriber;
@@ -21,7 +20,7 @@ public class MavJROSDepthSubscriber extends MavJROSAbstractSubscriber<sensor_msg
 	private final DataModel                            model;
 
 	private final DogArray_I16 worker = new DogArray_I16();
-
+	
 	public MavJROSDepthSubscriber(DataModel model, String rosTopicName, int width, int height, IVisualStreamHandler<Planar<GrayU8>> stream)  {
 		super(rosTopicName, sensor_msgs.Image._TYPE);
 		
@@ -34,7 +33,7 @@ public class MavJROSDepthSubscriber extends MavJROSAbstractSubscriber<sensor_msg
 	@Override
 	public void callback(Image message) {
 		convert(message.getData().toByteBuffer().asShortBuffer(), message.getHeight(), 640, depth_image, worker);
-		stream.addToStream("DEPTH", depth_image, model, System.currentTimeMillis());		
+		stream.addToStream("DEPTH", depth_image, model, System.currentTimeMillis());
 	}
 	
 	private  void convert(ShortBuffer src , int height , int srcStride ,Planar<GrayU8> dst , DogArray_I16 work ){

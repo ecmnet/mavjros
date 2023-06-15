@@ -3,6 +3,7 @@ package com.comino.mavjros.subscribers.rgb;
 import java.nio.ByteBuffer;
 
 import org.ddogleg.struct.DogArray_I8;
+import org.ros.message.Time;
 
 import com.comino.mavcom.model.DataModel;
 import com.comino.mavjros.MavJROSAbstractSubscriber;
@@ -13,29 +14,34 @@ import boofcv.struct.image.Planar;
 import sensor_msgs.Image;
 
 public class MavJROSRGBSubscriber extends MavJROSAbstractSubscriber<sensor_msgs.Image> {
-	
+
 	private final Planar<GrayU8>                       rgb_image;
 	private final IVisualStreamHandler<Planar<GrayU8>> stream;
 	private final DataModel                            model;
-	
+
+	private Time old_tms;
+
 	private final DogArray_I8 worker = new DogArray_I8();
 
 	public MavJROSRGBSubscriber(DataModel model, String rosTopicName, int width, int height, IVisualStreamHandler<Planar<GrayU8>> stream)  {
 		super(rosTopicName, sensor_msgs.Image._TYPE);
-		
+
 		this.rgb_image    = new Planar<GrayU8>(GrayU8.class,width,height,3);
 		this.stream       = stream;
 		this.model        = model;
-		
+
 	}
 
 	@Override
 	public void callback(Image message) {
 		convert(message.getData().toByteBuffer(), message.getHeight(), 1920, rgb_image, worker);
 		stream.addToStream("RGB", rgb_image, model, System.currentTimeMillis());
-		
+		if(old_tms!=null)
+			model.slam.fps = model.slam.fps * 0.95f + 50_000_000f / message.getHeader().getStamp().subtract(old_tms).totalNsecs();
+		old_tms = message.getHeader().getStamp();
+
 	}
-	
+
 	private  void convert(ByteBuffer src , int height , int srcStride ,Planar<GrayU8> dst , DogArray_I8 work ){
 		work.resize(dst.width*3);
 
