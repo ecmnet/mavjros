@@ -3,7 +3,6 @@ package com.comino.mavjros.subscribers.rgb;
 import java.nio.ShortBuffer;
 
 import org.ddogleg.struct.DogArray_I16;
-import org.ros.message.Time;
 
 import com.comino.mavcom.model.DataModel;
 import com.comino.mavjros.MavJROSAbstractSubscriber;
@@ -32,7 +31,7 @@ public class MavJROSDepthSubscriber extends MavJROSAbstractSubscriber<sensor_msg
 
 	@Override
 	public void callback(Image message) {
-		convert(message.getData().toByteBuffer().asShortBuffer(), message.getHeight(), 640, depth_image, worker);
+		convert(message.getData().toByteBuffer().asShortBuffer(), depth_image.height,depth_image.width, depth_image, worker);
 		stream.addToStream("DEPTH", depth_image, model, System.currentTimeMillis());
 	}
 	
@@ -55,6 +54,4 @@ public class MavJROSDepthSubscriber extends MavJROSAbstractSubscriber<sensor_msg
 			indexSrc += srcStride;
 		}
 	}
-
-
 }
