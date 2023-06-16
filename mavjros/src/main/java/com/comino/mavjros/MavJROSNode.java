@@ -14,6 +14,8 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Subscriber;
 
+import com.comino.mavcom.model.DataModel;
+import com.comino.mavcom.model.segment.Status;
 import com.google.common.base.Preconditions;
 
 public class MavJROSNode {
@@ -28,16 +30,19 @@ public class MavJROSNode {
 	private NodeConfiguration nodeConfiguration;
 	private MavJROSSubscriberNode subscriberNode;
 	
+	private final DataModel model;
 	
-	public static MavJROSNode getInstance() {
+	
+	public static MavJROSNode getInstance(DataModel model) {
 		if(instance == null) {
-			instance = new MavJROSNode();
+			instance = new MavJROSNode(model);
 		}
 		return instance;
 	}
 	
-	public MavJROSNode() {
+	public MavJROSNode(DataModel model) {
 		 this.subscriberNode = new MavJROSSubscriberNode();
+		 this.model          = model;
 	}
 	
 	
@@ -56,6 +61,8 @@ public class MavJROSNode {
         nodeConfiguration.setMasterUri(rosMasterUri);
         
         nodeMainExecutor.execute(subscriberNode, nodeConfiguration);
+        
+        model.sys.setSensor(Status.MSP_ROS_AVAILABILITY, true);
         
         
 	}
