@@ -1,4 +1,4 @@
-package com.comino.mavjros.subscribers.rgb;
+package com.comino.mavjros.subscribers.depth;
 
 import java.nio.ShortBuffer;
 
