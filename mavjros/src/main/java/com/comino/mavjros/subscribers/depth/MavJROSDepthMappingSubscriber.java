@@ -9,6 +9,7 @@ import org.ddogleg.struct.DogArray_I16;
 import com.comino.mavcom.model.DataModel;
 import com.comino.mavcom.utils.MSP3DUtils;
 import com.comino.mavjros.MavJROSAbstractSubscriber;
+import com.comino.mavjros.MavJROSNode;
 import com.comino.mavmap.map.map3D.impl.octomap.MAVOctoMap3D;
 import com.comino.mavmap.map.map3D.impl.octomap.tools.MAVOctoMapTools;
 import com.comino.mavodometry.video.IVisualStreamHandler;
@@ -36,10 +37,9 @@ public class MavJROSDepthMappingSubscriber extends MavJROSAbstractSubscriber<sen
 
 	private final DogArray_I16 worker   = new DogArray_I16();
 	private final PointCloud   scan     = new PointCloud();
-	private final Se3_F64      to_ned   = new Se3_F64();
+	private  Se3_F64      to_ned   = new Se3_F64();
 	private final Point2D3D    ned_p    = new Point2D3D();
 	private final Point2D_F64  norm     = new Point2D_F64();
-	private final Point3D_F64  ned_pt_n = new Point3D_F64();
 
 	private final Point2D3D    tmp_p = new Point2D3D();
 
@@ -47,7 +47,7 @@ public class MavJROSDepthMappingSubscriber extends MavJROSAbstractSubscriber<sen
 	public MavJROSDepthMappingSubscriber(DataModel model,MAVOctoMap3D map, String rosTopicName, int width, int height, IVisualStreamHandler<Planar<GrayU8>> stream)  {
 		super(rosTopicName, sensor_msgs.Image._TYPE);
 
-		this.depth_image    = new Planar<GrayU8>(GrayU8.class,width,height,3);
+		this.depth_image  = new Planar<GrayU8>(GrayU8.class,width,height,3);
 		this.stream       = stream;
 		this.model        = model;
 		this.map          = map;
@@ -55,8 +55,8 @@ public class MavJROSDepthMappingSubscriber extends MavJROSAbstractSubscriber<sen
 		CameraPinholeBrown instrinsics = new CameraPinholeBrown();
 		instrinsics.cx = 320f;
 		instrinsics.cy = 240f;
-		instrinsics.fx = 640 * (Math.tan(1.48702/2)*2);
-		instrinsics.fy = instrinsics.fx;
+		instrinsics.fx = 347.99755859375f;
+		instrinsics.fy = 347.99755859375f;
 
 		p2n = (narrow(instrinsics)).undistort_F64(true,false);
 
@@ -64,7 +64,7 @@ public class MavJROSDepthMappingSubscriber extends MavJROSAbstractSubscriber<sen
 
 	@Override
 	public void callback(Image message) {
-		MSP3DUtils.convertModelToSe3_F64(model, to_ned); 
+		to_ned = model.getBodyToNedBuffer().get(MavJROSNode.getAsUnixTime(message.getHeader().getStamp()));
 		convert(message.getData().toByteBuffer().asShortBuffer(), depth_image.height,depth_image.width, depth_image, worker);
 		stream.addToStream("DEPTH", depth_image, model, System.currentTimeMillis());
 	}
@@ -87,11 +87,10 @@ public class MavJROSDepthMappingSubscriber extends MavJROSAbstractSubscriber<sen
 			for (int i = 0; i < work.size; indexDst++) {
 				if(project(i,y,work.data[i],tmp_p)) {
 					GeometryMath_F64.mult(to_ned.R, tmp_p.location, ned_p.location );
-					
 					ned_p.location.plusIP(to_ned.T); 
-					ned_p.location.z -= to_ned.T.z; 
 					
-					MAVOctoMapTools.addToPointCloud(scan, ned_p.location);
+					if(ned_p.location.z < -0.2)
+					   MAVOctoMapTools.addToPointCloud(scan, ned_p.location);
 				}
 				r.data[indexDst] = (byte)(work.data[i]/40);
 				i++;
@@ -108,7 +107,7 @@ public class MavJROSDepthMappingSubscriber extends MavJROSAbstractSubscriber<sen
 		p.observation.y = y;
 
 		p.location.x = (depth ) * 1e-3;
-		if(p.location.x < 0.3 || p.location.x > 10)
+		if(p.location.x < 0.3 || p.location.x > 8.0)
 			return false;
 
 		p2n.compute(p.observation.x,p.observation.y,norm);

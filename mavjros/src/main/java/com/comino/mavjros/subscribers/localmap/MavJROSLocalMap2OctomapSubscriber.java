@@ -1,8 +1,5 @@
 package com.comino.mavjros.subscribers.localmap;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.comino.mavcom.model.DataModel;
 import com.comino.mavjros.MavJROSAbstractSubscriber;
 import com.comino.mavjros.utils.MavJROSUtils;
@@ -21,6 +18,8 @@ public class MavJROSLocalMap2OctomapSubscriber extends MavJROSAbstractSubscriber
 	private final Vector3D_F64                         point_t;
 	private final Quaternion_F64                       rotation;
 	private final Se3_F64                              transform;
+	
+	private long tms;
 
 	private MAVOctoMap3D map;
 
@@ -40,6 +39,9 @@ public class MavJROSLocalMap2OctomapSubscriber extends MavJROSAbstractSubscriber
 
 	@Override
 	public void callback(glmapping.local2global message) {
+		
+		if((System.currentTimeMillis()-tms)<100)
+			return;
 
 		MavJROSUtils.convert(message.getTWL().getTranslation(), transform.T);
 		MavJROSUtils.convert(message.getTWL().getRotation(),rotation);
@@ -49,7 +51,7 @@ public class MavJROSLocalMap2OctomapSubscriber extends MavJROSAbstractSubscriber
 			MavJROSUtils.convert(missed, point);
 			transform.transform(point, point_t); point_t.plusIP(transform.T);
 			if(point_t.z < -0.2f)
-			  map.insert(point_t.y, point_t.x,- point_t.z, false);
+			  map.insert(point_t.y+0.1, point_t.x+0.1, -point_t.z+0.1, false);
 			 
 		});
 

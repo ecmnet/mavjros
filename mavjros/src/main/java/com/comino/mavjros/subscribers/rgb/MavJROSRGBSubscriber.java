@@ -34,7 +34,7 @@ public class MavJROSRGBSubscriber extends MavJROSAbstractSubscriber<sensor_msgs.
 
 	@Override
 	public void callback(Image message) {
-		convert(message.getData().toByteBuffer(), message.getHeight(), 1920, rgb_image, worker);
+		convert(message.getData().toByteBuffer(), message.getHeight(), message.getWidth()*3, rgb_image, worker);
 		stream.addToStream("RGB", rgb_image, model, System.currentTimeMillis());
 		if(old_tms!=null)
 			model.slam.fps = model.slam.fps * 0.95f + 50_000_000f / message.getHeader().getStamp().subtract(old_tms).totalNsecs();
@@ -49,7 +49,7 @@ public class MavJROSRGBSubscriber extends MavJROSAbstractSubscriber<sensor_msgs.
 		GrayU8 g = dst.getBand(0);
 		GrayU8 b = dst.getBand(1);
 
-		int indexSrc = 0;
+		int indexSrc = 60;
 		for (int y = 0; y < height; y++) {
 			src.position(indexSrc);
 			src.get(work.data,0,work.size);
