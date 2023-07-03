@@ -37,11 +37,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ros.rosjava_messages</groupId>
-			<artifactId>rosgraph_msgs</artifactId>
-			<version>1.11.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.ros.rosjava_messages</groupId>
 			<artifactId>geometry_msgs</artifactId>
 			<version>1.12.7</version>
 		</dependency>

@@ -26,7 +26,6 @@ public class MavJROSLocalMapTransferSubscriber extends MavJROSAbstractSubscriber
 	private final Vector3D_F64                         point_t;
 	private final Quaternion_F64                       rotation;
 	private final Se3_F64                              transform;
-	private final WorkQueue                            wq;
 
 	public MavJROSLocalMapTransferSubscriber(IMAVController control, String rosTopicName)  {
 		super(rosTopicName, glmapping.local2global._TYPE);
@@ -37,10 +36,6 @@ public class MavJROSLocalMapTransferSubscriber extends MavJROSAbstractSubscriber
 		this.point_t      = new Vector3D_F64();
 		this.rotation     = new Quaternion_F64();
 		this.transform    = new Se3_F64();
-
-		this.wq      = WorkQueue.getInstance();
-		wq.addCyclicTask("NP",15, new MapToModelTransfer());
-
 	}
 
 	@Override
@@ -70,23 +65,6 @@ public class MavJROSLocalMapTransferSubscriber extends MavJROSAbstractSubscriber
 			}
 		});
 
-	}
-
-	private class MapToModelTransfer implements Runnable {
-
-		private final msg_msp_micro_grid  grid     = new msg_msp_micro_grid(2,1);
-
-		@Override
-		public void run() {
-
-			model.sys.setSensor(Status.MSP_GRID_AVAILABILITY, true);
-			if(model.grid.toArray(grid.data)) {
-				grid.tms        = DataModel.getSynchronizedPX4Time_us();
-				grid.count      = model.grid.count;
-				grid.resolution = 0.2f;
-				control.sendMAVLinkMessage(grid);
-			}
-		}
 	}
 
 	private long encode(GeoTuple3D_F64<?> p, byte value) {

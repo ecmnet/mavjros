@@ -33,15 +33,16 @@ public class MavJROSLocalMap2OctomapSubscriber extends MavJROSAbstractSubscriber
 		this.rotation     = new Quaternion_F64();
 		this.transform    = new Se3_F64();
 
-		map.enableRemoveOutdated(true);
+		map.enableRemoveOutdated(false);
 		
 	}
 
 	@Override
 	public void callback(glmapping.local2global message) {
 		
-		if((System.currentTimeMillis()-tms)<100)
+		if((System.currentTimeMillis()-tms)<50)
 			return;
+		tms = System.currentTimeMillis();
 
 		MavJROSUtils.convert(message.getTWL().getTranslation(), transform.T);
 		MavJROSUtils.convert(message.getTWL().getRotation(),rotation);
@@ -50,7 +51,7 @@ public class MavJROSLocalMap2OctomapSubscriber extends MavJROSAbstractSubscriber
 		message.getPtsMissL().forEach(missed -> {
 			MavJROSUtils.convert(missed, point);
 			transform.transform(point, point_t); point_t.plusIP(transform.T);
-			if(point_t.z < -0.2f)
+			if(point_t.z < -0.3f)
 			  map.insert(point_t.y+0.1, point_t.x+0.1, -point_t.z+0.1, false);
 			 
 		});
@@ -58,7 +59,7 @@ public class MavJROSLocalMap2OctomapSubscriber extends MavJROSAbstractSubscriber
 		message.getPtsObsL().forEach(obs -> {
 			MavJROSUtils.convert(obs, point);
 			transform.transform(point, point_t);  point_t.plusIP(transform.T);
-			if(point_t.z < - 0.2f)
+			if(point_t.z < - 0.3f)
 			  map.insert(point_t.y+0.1, point_t.x+0.1, - point_t.z+0.1, true);
 		});
 

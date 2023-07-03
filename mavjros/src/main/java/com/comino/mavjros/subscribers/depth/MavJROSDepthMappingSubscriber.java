@@ -7,9 +7,7 @@ import java.nio.ShortBuffer;
 import org.ddogleg.struct.DogArray_I16;
 
 import com.comino.mavcom.model.DataModel;
-import com.comino.mavcom.utils.MSP3DUtils;
 import com.comino.mavjros.MavJROSAbstractSubscriber;
-import com.comino.mavjros.MavJROSNode;
 import com.comino.mavmap.map.map3D.impl.octomap.MAVOctoMap3D;
 import com.comino.mavmap.map.map3D.impl.octomap.tools.MAVOctoMapTools;
 import com.comino.mavodometry.video.IVisualStreamHandler;
@@ -21,13 +19,14 @@ import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.Planar;
 import georegression.geometry.GeometryMath_F64;
 import georegression.struct.point.Point2D_F64;
-import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import sensor_msgs.Image;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.jOctoMap.pointCloud.PointCloud;
 
 public class MavJROSDepthMappingSubscriber extends MavJROSAbstractSubscriber<sensor_msgs.Image> {
+	
+	private static final int DEPTH_DELAY_MS = 20;
 
 	private final Planar<GrayU8>                       depth_image;
 	private final IVisualStreamHandler<Planar<GrayU8>> stream;
@@ -64,7 +63,7 @@ public class MavJROSDepthMappingSubscriber extends MavJROSAbstractSubscriber<sen
 
 	@Override
 	public void callback(Image message) {
-		to_ned = model.getBodyToNedBuffer().get(MavJROSNode.getAsUnixTime(message.getHeader().getStamp()));
+		to_ned = model.getBodyToNedBuffer().get(System.currentTimeMillis() - DEPTH_DELAY_MS );
 		convert(message.getData().toByteBuffer().asShortBuffer(), depth_image.height,depth_image.width, depth_image, worker);
 		stream.addToStream("DEPTH", depth_image, model, System.currentTimeMillis());
 	}

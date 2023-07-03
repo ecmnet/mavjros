@@ -34,7 +34,7 @@ public class MavJROSRGBSubscriber extends MavJROSAbstractSubscriber<sensor_msgs.
 
 	@Override
 	public void callback(Image message) {
-		convert(message.getData().toByteBuffer(), message.getHeight(), message.getWidth()*3, rgb_image, worker);
+		convert(message.getData().toByteBuffer(), message.getHeight(), message.getWidth()*3, rgb_image, worker, message.getEncoding());
 		stream.addToStream("RGB", rgb_image, model, System.currentTimeMillis());
 		if(old_tms!=null)
 			model.slam.fps = model.slam.fps * 0.95f + 50_000_000f / message.getHeader().getStamp().subtract(old_tms).totalNsecs();
@@ -42,14 +42,20 @@ public class MavJROSRGBSubscriber extends MavJROSAbstractSubscriber<sensor_msgs.
 
 	}
 
-	private  void convert(ByteBuffer src , int height , int srcStride ,Planar<GrayU8> dst , DogArray_I8 work ){
+	private  void convert(ByteBuffer src , int height , int srcStride ,Planar<GrayU8> dst , DogArray_I8 work, String encoding){
 		work.resize(dst.width*3);
 
-		GrayU8 r = dst.getBand(2);
-		GrayU8 g = dst.getBand(0);
-		GrayU8 b = dst.getBand(1);
+		GrayU8 r; GrayU8 g; GrayU8 b;
 
-		int indexSrc = 60;
+		if(encoding.contains("RGB")) {
+			r = dst.getBand(1); g = dst.getBand(0); b = dst.getBand(2);
+		}
+		else {
+			r = dst.getBand(2); g = dst.getBand(1); b = dst.getBand(0);
+		}
+
+
+		int indexSrc = 66;
 		for (int y = 0; y < height; y++) {
 			src.position(indexSrc);
 			src.get(work.data,0,work.size);
