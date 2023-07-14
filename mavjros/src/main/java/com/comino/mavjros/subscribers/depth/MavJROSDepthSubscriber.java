@@ -11,6 +11,7 @@ import com.comino.mavodometry.video.IVisualStreamHandler;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.Planar;
 import sensor_msgs.Image;
+import std_msgs.Header;
 
 public class MavJROSDepthSubscriber extends MavJROSAbstractSubscriber<sensor_msgs.Image> {
 	
@@ -33,6 +34,11 @@ public class MavJROSDepthSubscriber extends MavJROSAbstractSubscriber<sensor_msg
 	public void callback(Image message) {
 		convert(message.getData().toByteBuffer().asShortBuffer(), depth_image.height,depth_image.width, depth_image, worker);
 		stream.addToStream("DEPTH", depth_image, model, System.currentTimeMillis());
+//		long tms = message.getHeader().getStamp().totalNsecs()/1000_000L-50;
+//		System.out.println(model.toNEDBuffer.get(Long.MAX_VALUE));
+//		System.out.println(model.toNEDBuffer.get(tms));
+//		System.out.println(model.toNEDBuffer.getDelta(tms));
+		
 	}
 	
 	private  void convert(ShortBuffer src , int height , int srcStride ,Planar<GrayU8> dst , DogArray_I16 work ){
@@ -53,5 +59,9 @@ public class MavJROSDepthSubscriber extends MavJROSAbstractSubscriber<sensor_msg
 			}
 			indexSrc += srcStride;
 		}
+	}
+	
+	private long getTimestamp(Header header) {
+		return header.getStamp().secs * 1000L + header.getStamp().nsecs/1000_000L;
 	}
 }

@@ -53,7 +53,7 @@ public class MavJROSLocalMapTransferSubscriber extends MavJROSAbstractSubscriber
 			MavJROSUtils.convert(missed, point);
 			transform.transform(point, point_t); point_t.plusIP(transform.T);
 			if(point_t.z < -0.2f) {
-				model.grid.add(encode(point_t,(byte)0));	
+				model.grid.add(encode(point_t,(byte)0));
 			}
 		});
 

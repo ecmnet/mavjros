@@ -37,7 +37,7 @@ public class MavJROSRGBSubscriber extends MavJROSAbstractSubscriber<sensor_msgs.
 		convert(message.getData().toByteBuffer(), message.getHeight(), message.getWidth()*3, rgb_image, worker, message.getEncoding());
 		stream.addToStream("RGB", rgb_image, model, System.currentTimeMillis());
 		if(old_tms!=null)
-			model.slam.fps = model.slam.fps * 0.95f + 50_000_000f / message.getHeader().getStamp().subtract(old_tms).totalNsecs();
+			model.slam.fps = model.slam.fps * 0.60f + 400_000_000f / message.getHeader().getStamp().subtract(old_tms).totalNsecs();
 		old_tms = message.getHeader().getStamp();
 
 	}
@@ -53,7 +53,6 @@ public class MavJROSRGBSubscriber extends MavJROSAbstractSubscriber<sensor_msgs.
 		else {
 			r = dst.getBand(2); g = dst.getBand(1); b = dst.getBand(0);
 		}
-
 
 		int indexSrc = 66;
 		for (int y = 0; y < height; y++) {
