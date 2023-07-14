@@ -41,6 +41,9 @@ public class MavJROSDepthMappingSubscriber extends MavJROSAbstractSubscriber<sen
 	private final Point2D_F64  norm     = new Point2D_F64();
 
 	private final Point2D3D    tmp_p = new Point2D3D();
+	
+	private long tms, tms_old;
+	private float dt_sec, dt_sec_1;
 
 
 	public MavJROSDepthMappingSubscriber(DataModel model,MAVOctoMap3D map, String rosTopicName, int width, int height, IVisualStreamHandler<Planar<GrayU8>> stream)  {
@@ -66,8 +69,17 @@ public class MavJROSDepthMappingSubscriber extends MavJROSAbstractSubscriber<sen
 		to_ned = model.getBodyToNedBuffer().get(System.currentTimeMillis() - DEPTH_DELAY_MS );
 		convert(message.getData().toByteBuffer().asShortBuffer(), depth_image.height,depth_image.width, depth_image, worker);
 		stream.addToStream("DEPTH", depth_image, model, System.currentTimeMillis());
+	
+		tms = message.getHeader().getStamp().totalNsecs()/1000_000L;
+		dt_sec   = (tms - tms_old) / 1000f;
+		if(dt_sec > 0) {
+			dt_sec_1 = 1.0f / dt_sec;
+			model.slam.fps = model.slam.fps * 0.95f + 0.05f*(float)dt_sec_1;
+		}
+		tms_old = tms;
 	}
 
+	// Own thread
 	private  void convert(ShortBuffer src , int height , int srcStride ,Planar<GrayU8> dst , DogArray_I16 work ){
 		work.resize(dst.width);
 
@@ -84,7 +96,7 @@ public class MavJROSDepthMappingSubscriber extends MavJROSAbstractSubscriber<sen
 
 			int indexDst = dst.startIndex + dst.stride * y;
 			for (int i = 0; i < work.size; indexDst++) {
-				if(project(i,y,work.data[i],tmp_p)) {
+				if(y > 120 && y <360 && (i %2 ) == 0 &&project(i,y,work.data[i],tmp_p)) {
 					GeometryMath_F64.mult(to_ned.R, tmp_p.location, ned_p.location );
 					ned_p.location.plusIP(to_ned.T); 
 					

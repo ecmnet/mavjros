@@ -19,8 +19,6 @@ public class MavJROSRGBSubscriber extends MavJROSAbstractSubscriber<sensor_msgs.
 	private final IVisualStreamHandler<Planar<GrayU8>> stream;
 	private final DataModel                            model;
 
-	private Time old_tms;
-
 	private final DogArray_I8 worker = new DogArray_I8();
 
 	public MavJROSRGBSubscriber(DataModel model, String rosTopicName, int width, int height, IVisualStreamHandler<Planar<GrayU8>> stream)  {
@@ -36,10 +34,6 @@ public class MavJROSRGBSubscriber extends MavJROSAbstractSubscriber<sensor_msgs.
 	public void callback(Image message) {
 		convert(message.getData().toByteBuffer(), message.getHeight(), message.getWidth()*3, rgb_image, worker, message.getEncoding());
 		stream.addToStream("RGB", rgb_image, model, System.currentTimeMillis());
-		if(old_tms!=null)
-			model.slam.fps = model.slam.fps * 0.60f + 400_000_000f / message.getHeader().getStamp().subtract(old_tms).totalNsecs();
-		old_tms = message.getHeader().getStamp();
-
 	}
 
 	private  void convert(ByteBuffer src , int height , int srcStride ,Planar<GrayU8> dst , DogArray_I8 work, String encoding){
